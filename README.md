@@ -1,2 +1,2 @@
-# DietScan-Care-AI
-호흡기질환자와 고령자의 호흡 건강관리를 위한 식이 영양 관리용 AI 솔루션 개발 및 연구
+# Biofouling-Detect-AI
+AI 기반 스마트부표 광학 센서 바이오파울링 이상 탐지 서비스
