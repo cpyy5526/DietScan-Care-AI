@@ -4,7 +4,7 @@
 - 작업 중 중간중간에 수시로 pull을 실행하는 것이 좋습니다. (로컬에서의 pull과 Github 웹에서의 pull reqeust는 전혀 다른 별개의 작업입니다.)
 - branch 생성의 경우 Github 웹에서 Issue Tracking 기능과 연결하는 게 더 일반적이고 관리하기 편하기 때문에, 로컬에서의 branch 생성과 관련된 내용은 제외했습니다. Issue 생성을 통한 branch 생성에 대해서는 다음 문서에서 확인할 수 있습니다.
     
-    [Branch 관리 정책](./3-Branch-관리-정책.md)
+    [Branch 관리 정책](./Branch-관리-정책.md)
     
 - 한 사람이 동시에 여러 branch에서 작업하는 경우는 없을 것 같아, 로컬에서의 branch 전환 관련 내용도 제외했습니다. 다만 로컬 작업 중 실수로 main(develop)에 있게 된 경우 되면 바로 개인 branch로 전환하시기 바랍니다. (commit 중 git status에서 작업 중인 branch 확인 가능)
 
