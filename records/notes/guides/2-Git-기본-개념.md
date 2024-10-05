@@ -24,7 +24,7 @@
 - “main” branch에 commit A, B, C가 순서대로 이루어지는 과정을 다음과 같이 나타낼 수 있습니다.
     - commit 과정 그림
         
-        ![branch-commit.svg](images/branch-commit.svg)
+        ![branch-commit.svg](../images/branch-commit.svg)
         
 - 프로젝트 진행에 따라 여러 개의 branch가 추가되거나 삭제될 수 있습니다.
 - 일반적인 팀 프로젝트에서는 main branch와 feature branch로 구분하여 개발 흐름을 관리합니다.
@@ -55,7 +55,7 @@
 - 결과적으로는 마치 처음부터 main branch(A-D)에 commit B’, C’를 추가한 것처럼 보입니다. 전체적인 과정을 그림으로 나타내면 다음과 같습니다.
     - rebase 진행 과정 그림
         
-        ![rebase.svg](images/rebase.svg)
+        ![rebase.svg](../images/rebase.svg)
         
 
 ## 6.  Merge Conflict
