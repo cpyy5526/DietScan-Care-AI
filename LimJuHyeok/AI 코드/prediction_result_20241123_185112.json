@@ -1,0 +1,14 @@
+{
+    "timestamp": "2024-11-23 18:51:12",
+    "prediction": "Abnormal",
+    "normal_probability": 2.5609997464925982e-05,
+    "abnormal_probability": 0.9999743700027466,
+    "recent_oxygen_levels": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+    ],
+    "device_id": "wando01"
+}
