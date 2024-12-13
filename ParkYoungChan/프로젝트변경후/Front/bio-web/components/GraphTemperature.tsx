@@ -37,7 +37,7 @@ export default function GraphTemperature({ deviceId, day }: GraphTemperatureProp
     };
 
     fetchOxygenData();
-  }, [deviceId]);
+  }, [deviceId, day]);
 
   const formattedData = useMemo(
     () =>
@@ -52,7 +52,7 @@ export default function GraphTemperature({ deviceId, day }: GraphTemperatureProp
     () => ({
       datasets: [
         {
-          label: 'Oxygen (ppm)',
+          label: 'Temperature',
           data: formattedData,
           borderColor: '#00FF08',
           backgroundColor: 'rgb(14, 255, 42, 0.2)',
@@ -72,7 +72,7 @@ export default function GraphTemperature({ deviceId, day }: GraphTemperatureProp
       },
       title: {
         display: true,
-        text: 'Oxygen PPM Time Series',
+        text: 'Temperature Time Series',
       },
       tooltip: {
         callbacks: {
@@ -125,7 +125,7 @@ export default function GraphTemperature({ deviceId, day }: GraphTemperatureProp
       y: {
         title: {
           display: true,
-          text: 'Oxygen (ppm)',
+          text: 'Temperature',
         },
       },
     },

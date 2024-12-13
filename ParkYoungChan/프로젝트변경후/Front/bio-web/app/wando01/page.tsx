@@ -13,6 +13,9 @@ import Min from '@/components/min';
 import Mean from '@/components/mean';
 import Variance from '@/components/variance';
 import LogoutButton from '@/components/LogoutButton';
+import { useBackgroundContext } from '@/app/test/context';
+import Dayselect from '@/components/Dayselect';
+
 import '@/styles/dashboardstyle.css';
 
 export default function Home() {
@@ -20,6 +23,10 @@ export default function Home() {
   const router = useRouter();
   const [day, setDay] = useState(Date.now());
 
+  const handleDateChange = (timestamp: number) => {
+    setDay(timestamp); // 선택된 날짜를 업데이트
+    console.log('Selected Timestamp:', timestamp);
+  };
   const goToNextPage = () => {
     router.push('/wando01b'); // 이동할 페이지 경로
   };
@@ -30,6 +37,22 @@ export default function Home() {
   const goToSettingpage = () => {
     router.push('/settings');
   };
+
+  const { isBackgroundActive, setIsBackgroundActive } = useBackgroundContext();
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const body = document.body;
+      if (isBackgroundActive) {
+        body.style.backgroundImage = "url('/wave-background.png')";
+        body.style.backgroundSize = 'cover';
+        body.style.backgroundRepeat = 'no-repeat';
+        body.style.backgroundPosition = 'center';
+      } else {
+        body.style.backgroundImage = 'none';
+        body.style.background = '#F8F8FA';
+      }
+    }
+  }, [isBackgroundActive]);
 
   return (
     <>
@@ -67,6 +90,9 @@ export default function Home() {
         {/* middle sector */}
         <div className="select-data">
           <span className="text-space">데이터를 선택해주세요</span>
+          <div className="date-buttons">
+            <Dayselect onDateChange={handleDateChange} />
+          </div>
         </div>
 
         <div className="now-danger">

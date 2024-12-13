@@ -37,7 +37,7 @@ export default function GraphSalinity({ deviceId, day }: GraphSalinityProps) {
     };
 
     fetchOxygenData();
-  }, [deviceId]);
+  }, [deviceId, day]);
 
   const formattedData = useMemo(
     () =>
@@ -52,7 +52,7 @@ export default function GraphSalinity({ deviceId, day }: GraphSalinityProps) {
     () => ({
       datasets: [
         {
-          label: 'Oxygen (ppm)',
+          label: 'Salinity',
           data: formattedData,
           borderColor: '#7B1FA2',
           backgroundColor: 'rgb(206, 147, 216, 0.2)',
@@ -72,7 +72,7 @@ export default function GraphSalinity({ deviceId, day }: GraphSalinityProps) {
       },
       title: {
         display: true,
-        text: 'Oxygen PPM Time Series',
+        text: 'Salinity Time Series',
       },
       tooltip: {
         callbacks: {
@@ -125,7 +125,7 @@ export default function GraphSalinity({ deviceId, day }: GraphSalinityProps) {
       y: {
         title: {
           display: true,
-          text: 'Oxygen (ppm)',
+          text: 'Salinity',
         },
       },
     },
