@@ -1,0 +1,62 @@
+'use client';
+
+import { useState, FormEvent } from 'react';
+import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
+import '@//styles/login.css';
+
+export default function LoginPage() {
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    try {
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError('이메일 또는 비밀번호를 확인해주세요.');
+      } else {
+        router.push('/dashboard');
+      }
+    } catch (err) {
+      setError('로그인 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleRegister = () => {
+    router.push('/signup');
+  };
+
+  return (
+    <div className="login-container">
+      <div className="login-box">
+        <h1 className="login-title">로그인</h1>
+        {error && <p className="login-error">{error}</p>}
+        <form onSubmit={handleSubmit} className="login-form">
+          <div>
+            <input type="email" name="email" placeholder="Email" required className="login-input" />
+          </div>
+          <div>
+            <input type="password" name="password" placeholder="Password" required className="login-input" />
+          </div>
+          <button type="submit" className="login-button">
+            로그인
+          </button>
+        </form>
+        <hr className="login-divider" />
+        <button onClick={handleRegister} className="register-button">
+          회원가입
+        </button>
+      </div>
+    </div>
+  );
+}
