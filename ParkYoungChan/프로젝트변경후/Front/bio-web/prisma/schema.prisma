@@ -14,10 +14,9 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
+  key_id        String   @id @default(cuid())
+  id     String   @unique
   name      String?
-  email     String   @unique
   password  String?
-  emailVerified DateTime?
-  image     String?
+  regi_date DateTime?
 }
