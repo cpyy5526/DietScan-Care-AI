@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 
 async function fetchLatestData(sensor_id: string) {
-  const response = await fetch(`/api/latest?sensor_id=${sensor_id}`);
+  const response = await fetch(`/api/api_protect/latest?sensor_id=${sensor_id}`);
   if (!response.ok) {
     throw new Error('Failed to fetch data');
   }

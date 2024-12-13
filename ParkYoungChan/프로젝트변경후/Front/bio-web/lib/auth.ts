@@ -1,7 +1,7 @@
 import prisma from '@/lib/prisma';
-import {PrismaAdapter} from '@next-auth/prisma-adapter';
+import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import bcrypt from 'bcryptjs';
-import {AuthOptions} from 'next-auth';
+import { AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
 export const authOptions: AuthOptions = {
@@ -10,7 +10,7 @@ export const authOptions: AuthOptions = {
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        id: {label: 'ID', type: 'text', placeholder: 'Enter your ID'},
+        id: { label: 'ID', type: 'text', placeholder: 'Enter your ID' },
         password: {
           label: 'Password',
           type: 'password',
@@ -23,15 +23,14 @@ export const authOptions: AuthOptions = {
         }
 
         const user = await prisma.user.findUnique({
-          where: {id: credentials.id},
+          where: { id: credentials.id },
         });
 
         if (!user || !user.password) {
           throw new Error('Invalid credentials');
         }
 
-        const isValidPassword =
-            await bcrypt.compare(credentials.password, user.password);
+        const isValidPassword = await bcrypt.compare(credentials.password, user.password);
         if (!isValidPassword) {
           throw new Error('Invalid password');
         }
@@ -40,7 +39,7 @@ export const authOptions: AuthOptions = {
         return {
           key_id: user.key_id,
           id: user.id,
-          name: user.name ?? undefined,  // null -> undefined 변환
+          name: user.name ?? undefined, // null -> undefined 변환
         };
       },
     }),
@@ -55,7 +54,7 @@ export const authOptions: AuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
-    async jwt({token, user}) {
+    async jwt({ token, user }) {
       if (user) {
         token.key_id = user.key_id;
         token.id = user.id;
@@ -63,7 +62,7 @@ export const authOptions: AuthOptions = {
       }
       return token;
     },
-    async session({session, token}) {
+    async session({ session, token }) {
       session.user = {
         key_id: token.key_id as string,
         id: token.id as string,

@@ -4,6 +4,7 @@ body {
   align-items: center;
   height: 100vh; /* 화면 전체 높이 */
   margin: 0; /* 기본 여백 제거 */
+  font-family: 'SpoqaHanSansNeo-Medium.ttf';
 }
 
 .container {
@@ -96,6 +97,12 @@ body {
   border-radius: 5px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   border: 1px solid #ddd;
+}
+
+.inference {
+  display: flex; /* Flexbox를 사용하여 정렬 */
+  height: 95%;
+  overflow: auto;
 }
 
 .select-data {
@@ -310,11 +317,12 @@ body {
 
 .btn_left,
 .btn_right {
-  width: 50px; /* 버튼의 너비 */
-  height: 50px; /* 버튼의 높이 */
-  background: linear-gradient(to bottom, #e7e4e4, #f8f8fa);
-  border: 1px solid black; /* 기본 테두리 제거 */
-  border-radius: 25px; /* 동그랗게 만들기 */
+  width: 0px; /* 버튼의 너비 */
+  height: 0px; /* 버튼의 높이 */
+
+  border-bottom: 50px solid transparent;
+  border-top: 50px solid transparent;
+
   position: absolute; /* 절대 위치 지정 */
   top: 50%; /* 세로 중앙 */
   transform: translateY(-50%); /* 세로 중앙 정렬 */
@@ -323,9 +331,16 @@ body {
 }
 
 .btn_left {
-  left: 20px; /* 왼쪽 여백 */
+  left: 30px; /* 왼쪽 여백 */
+  border-right: 50px solid #e7e4e4;
 }
 
 .btn_right {
-  right: 20px; /* 오른쪽 여백 */
+  right: 30px; /* 오른쪽 여백 */
+  border-left: 50px solid #e7e4e4;
+}
+.error-text {
+  color: red;
+  font-weight: bold;
+  text-align: center;
 }

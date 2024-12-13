@@ -61,8 +61,8 @@ export default function GraphOxygen({ deviceId, day, data }: GraphOxygenProps) {
         x: new Date(item.measure_time), // 13자리 Unix timestamp
         y: item.oxygen_ppm.value,
         pointBackgroundColor: isInRedRange ? 'red' : '#4FC3F7', // 빨간색 또는 기본 색
-        pointBorderColor: isInRedRange ? 'darkred' : '#4FC3F7',
-        pointRadius: isInRedRange ? 6 : 3, // 강조된 포인트는 크기를 크게
+        pointBorderColor: isInRedRange ? 'red' : '#4FC3F7',
+        pointRadius: isInRedRange ? 3 : 2, // 강조된 포인트는 크기를 크게
       };
     });
   }, [oxygen, data]);
@@ -77,6 +77,7 @@ export default function GraphOxygen({ deviceId, day, data }: GraphOxygenProps) {
           backgroundColor: 'rgba(79, 195, 247, 0.2)', // 진한 초록색, 약간 투명
           fill: true,
           pointBackgroundColor: formattedData.map((d) => d.pointBackgroundColor), // 각각의 포인트 색상
+          pointBorderColor: formattedData.map((d) => d.pointBorderColor),
           pointRadius: formattedData.map((d) => d.pointRadius), // 각각의 포인트 크기
         },
       ],

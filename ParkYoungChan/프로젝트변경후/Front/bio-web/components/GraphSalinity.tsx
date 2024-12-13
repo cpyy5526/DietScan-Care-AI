@@ -1,5 +1,3 @@
-'use client';
-
 import React, { useEffect, useState, useMemo } from 'react';
 import { Line } from 'react-chartjs-2';
 import { fetchData } from '@/app/api/api_protect/fetchData';
@@ -17,36 +15,57 @@ interface ResultItem {
   };
 }
 
+interface RangeDataItem {
+  key: number;
+  inference_time: string;
+  inference_result: string;
+}
+
 interface GraphSalinityProps {
   deviceId: string;
   day: number;
+  data: RangeDataItem[]; // data는 RangeDataItem 타입의 배열
 }
 
-export default function GraphSalinity({ deviceId, day }: GraphSalinityProps) {
-  const [salinity, setOxygen] = useState<ResultItem[]>([]);
+export default function GraphSalinity({ deviceId, day, data }: GraphSalinityProps) {
+  const [salinity, setSalinity] = useState<ResultItem[]>([]);
 
   useEffect(() => {
-    const fetchOxygenData = async () => {
+    const fetchSalinityData = async () => {
       try {
         const data = await fetchData(deviceId, 'conductivity', day); // fetchData 호출
-        console.log('Data fetched:', data); // 콘솔에 데이터 출력
-        setOxygen(data);
+        setSalinity(data);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
 
-    fetchOxygenData();
+    fetchSalinityData();
   }, [deviceId, day]);
 
-  const formattedData = useMemo(
-    () =>
-      salinity.map((item) => ({
+  const formattedData = useMemo(() => {
+    const redRanges = data
+      .filter((d) => d.inference_result === 'O')
+      .map((d) => {
+        const inferenceTime = new Date(d.inference_time).getTime();
+        return {
+          start: inferenceTime - 60 * 60 * 1000, // 1시간 전
+          end: inferenceTime,
+        };
+      });
+
+    return salinity.map((item) => {
+      const isInRedRange = redRanges.some((range) => item.measure_time >= range.start && item.measure_time <= range.end);
+
+      return {
         x: new Date(item.measure_time), // 13자리 Unix timestamp
         y: item.salinity.value,
-      })),
-    [salinity]
-  );
+        pointBackgroundColor: isInRedRange ? 'red' : '#7B1FA2', // 빨간색 또는 기본 색
+        pointBorderColor: isInRedRange ? 'red' : '#7B1FA2',
+        pointRadius: isInRedRange ? 1 : 0, // 강조된 포인트는 크기를 크게
+      };
+    });
+  }, [salinity, data]);
 
   const chartData = useMemo(
     () => ({
@@ -57,6 +76,9 @@ export default function GraphSalinity({ deviceId, day }: GraphSalinityProps) {
           borderColor: '#7B1FA2',
           backgroundColor: 'rgb(206, 147, 216, 0.2)',
           fill: true,
+          pointBackgroundColor: formattedData.map((d) => d.pointBackgroundColor), // 각각의 포인트 색상
+          pointBorderColor: formattedData.map((d) => d.pointBorderColor),
+          pointRadius: formattedData.map((d) => d.pointRadius), // 각각의 포인트 크기
         },
       ],
     }),
@@ -71,7 +93,7 @@ export default function GraphSalinity({ deviceId, day }: GraphSalinityProps) {
         position: 'top',
       },
       title: {
-        display: true,
+        display: false,
         text: 'Salinity Time Series',
       },
       tooltip: {
@@ -90,38 +112,28 @@ export default function GraphSalinity({ deviceId, day }: GraphSalinityProps) {
       x: {
         type: 'time',
         time: {
-          tooltipFormat: 'MM/dd h:mm a', // 툴팁 날짜 및 시간 포맷
-          unit: 'hour', // 시간 단위로 표시
+          unit: 'hour', // x축 단위: 시간
         },
         ticks: {
           callback: (value, index, ticks) => {
-            const currentDate = new Date(value as number);
-            const currentDay = currentDate.toDateString();
+            const date = new Date(value as number);
+            const hours = date.getHours();
+            const formattedTime = `${hours % 12 || 12}${hours >= 12 ? 'pm' : 'am'}`;
+            const formattedDate = `${date.getMonth() + 1}/${date.getDate()}`;
 
-            // 이전 tick의 날짜 가져오기
-            const prevTick = ticks[index - 1];
-            const prevDate = prevTick ? new Date(prevTick.value as number).toDateString() : null;
-
-            // 첫 번째 데이터인 경우 날짜와 시간 표시
-            if (index === 0) {
-              return `${currentDate.getMonth() + 1}/${currentDate.getDate()} ${currentDate.getHours() % 12 || 12}${currentDate.getHours() >= 12 ? 'pm' : 'am'}`;
+            // 첫 번째 데이터 혹은 날짜가 변경되는 경우 날짜 + 시간 표시
+            if (
+              index === 0 || // 첫 번째 데이터
+              new Date(ticks[index]?.value).toDateString() !== new Date(ticks[index - 1]?.value).toDateString()
+            ) {
+              return `${formattedDate} ${formattedTime}`;
             }
 
-            // 날짜가 바뀌는 경우 날짜와 시간 표시
-            if (currentDay !== prevDate) {
-              return `${currentDate.getMonth() + 1}/${currentDate.getDate()} ${currentDate.getHours() % 12 || 12}${currentDate.getHours() >= 12 ? 'pm' : 'am'}`;
-            }
-
-            // 날짜가 동일한 경우 시간만 표시
-            return `${currentDate.getHours() % 12 || 12}${currentDate.getHours() >= 12 ? 'pm' : 'am'}`;
+            // 기본적으로 시간만 표시
+            return formattedTime;
           },
         },
-        title: {
-          display: true,
-          text: 'Time',
-        },
       },
-
       y: {
         title: {
           display: true,
@@ -130,10 +142,6 @@ export default function GraphSalinity({ deviceId, day }: GraphSalinityProps) {
       },
     },
   };
-
-  if (salinity.length === 0) {
-    return <p>Loading data, please wait...</p>;
-  }
 
   return (
     <div style={{ width: '100%', height: '100%' }}>

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
+import { message } from 'antd';
 
 // SQLite 데이터베이스를 열기 위한 함수
 async function openDB() {
@@ -22,5 +23,21 @@ export async function GET() {
   } catch (error) {
     console.error('Database Error:', error);
     return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const { id } = await req.json();
+    if (!id) {
+      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+    }
+    const db = await openDB();
+
+    await db.run('DELETE FROM User WHERE id = ?', id);
+    return NextResponse.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    console.error('Database Error:', error);
+    return NextResponse.json({ error: 'Failed to delete user' }, { status: 500 });
   }
 }

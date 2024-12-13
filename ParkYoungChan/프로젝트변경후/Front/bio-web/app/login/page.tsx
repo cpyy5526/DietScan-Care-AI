@@ -4,8 +4,9 @@ import { useState, useEffect, FormEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import '@/styles/login.css';
+import { Suspense } from 'react';
 
-export default function LoginPage() {
+function LoginContent() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams(); // 쿼리 파라미터 읽기
@@ -70,5 +71,13 @@ export default function LoginPage() {
         </button>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>로딩 중...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

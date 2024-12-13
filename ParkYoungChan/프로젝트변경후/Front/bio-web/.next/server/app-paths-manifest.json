@@ -1,12 +1,15 @@
 {
-  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/api/auth/signup/route": "app/api/auth/signup/route.js",
+  "/_not-found/page": "app/_not-found/page.js",
   "/api/api_protect/latest/route": "app/api/api_protect/latest/route.js",
   "/api/api_protect/range/route": "app/api/api_protect/range/route.js",
   "/api/api_protect/users/route": "app/api/api_protect/users/route.js",
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
+  "/api/auth/signup/route": "app/api/auth/signup/route.js",
   "/login/page": "app/login/page.js",
+  "/page": "app/page.js",
   "/protected/page": "app/protected/page.js",
-  "/protected/[device]/page": "app/protected/[device]/page.js",
+  "/protected/settings/page": "app/protected/settings/page.js",
+  "/protected/test/page": "app/protected/test/page.js",
   "/signup/page": "app/signup/page.js",
-  "/protected/settings/page": "app/protected/settings/page.js"
+  "/protected/[device]/page": "app/protected/[device]/page.js"
 }
