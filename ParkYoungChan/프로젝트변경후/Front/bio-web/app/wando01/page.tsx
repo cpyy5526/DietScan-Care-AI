@@ -8,6 +8,8 @@ import GraphOxygen from '@/components/GraphOxygen';
 import GraphCondoc from '@/components/GraphConduc';
 import GraphSalinity from '@/components/GraphSalinity';
 import GraphTemperature from '@/components/GraphTemperature';
+import Latest from '@/components/latest';
+import RangeData from '@/components/range';
 import Max from '@/components/max';
 import Min from '@/components/min';
 import Mean from '@/components/mean';
@@ -21,12 +23,15 @@ import '@/styles/dashboardstyle.css';
 export default function Home() {
   const deviceId = 'wando01';
   const router = useRouter();
-  const [day, setDay] = useState(Date.now());
+
+  const [error, setError] = useState<string | null>(null);
+  const [day, setDay] = useState(Date.now() - 24 * 60 * 60 * 1000);
 
   const handleDateChange = (timestamp: number) => {
     setDay(timestamp); // 선택된 날짜를 업데이트
     console.log('Selected Timestamp:', timestamp);
   };
+
   const goToNextPage = () => {
     router.push('/wando01b'); // 이동할 페이지 경로
   };
@@ -85,6 +90,9 @@ export default function Home() {
           <div className="ebt-text">
             <span className="text-space1">최근에 예측한 바이오파울링 시간</span> <span className="text-space1">위험도</span>
           </div>
+          <div className="inference">
+            <RangeData deviceId={deviceId} day={day} />
+          </div>
         </div>
 
         {/* middle sector */}
@@ -96,7 +104,9 @@ export default function Home() {
         </div>
 
         <div className="now-danger">
-          <div className="bio-result">O</div>
+          <div className="bio-result">
+            <Latest deviceId={deviceId} />
+          </div>
           <img src="Wave1.png" className="wave1"></img>
           <img src="Wave2.png" className="wave2"></img>
           <div className="nd-column">
