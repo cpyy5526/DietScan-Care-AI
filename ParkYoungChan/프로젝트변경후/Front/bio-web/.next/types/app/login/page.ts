@@ -1,4 +1,4 @@
-// File: /home/youngchan/Documents/bio-web/app/login/page.tsx
+// File: /home/youngchan/Desktop/gitclone/Biofouling-Detect-AI/ParkYoungChan/프로젝트변경후/Front/bio-web/app/login/page.tsx
 import * as entry from '../../../../app/login/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

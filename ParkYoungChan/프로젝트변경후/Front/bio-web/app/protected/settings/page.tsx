@@ -152,7 +152,7 @@ export default function Setting() {
     <div style={{ width: '100%', height: '100%' }}>
       <div className="footer1">
         <div>
-          <img className="setting1" src="setting.png" alt="설정 아이콘" />
+          <img className="setting1" src="/setting.png" alt="설정 아이콘" />
         </div>
         <div>
           <span className="admin">사용자 관리</span>
@@ -179,7 +179,7 @@ export default function Setting() {
 
       <div className="footer1">
         <div>
-          <img className="setting1" src="setting.png" alt="설정 아이콘" />
+          <img className="setting1" src="/setting.png" alt="설정 아이콘" />
         </div>
         <div>
           <span className="admin">시스템 설정</span>

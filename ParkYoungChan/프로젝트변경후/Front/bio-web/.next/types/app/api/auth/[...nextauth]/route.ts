@@ -1,4 +1,4 @@
-// File: /home/youngchan/Documents/bio-web/app/api/auth/[...nextauth]/route.ts
+// File: /home/youngchan/Desktop/gitclone/Biofouling-Detect-AI/ParkYoungChan/프로젝트변경후/Front/bio-web/app/api/auth/[...nextauth]/route.ts
 import * as entry from '../../../../../../app/api/auth/[...nextauth]/route.js'
 import type { NextRequest } from 'next/server.js'
 
