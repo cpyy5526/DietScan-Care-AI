@@ -8,6 +8,12 @@ import GraphOxygen from '@/components/GraphOxygen';
 import GraphCondoc from '@/components/GraphConduc';
 import GraphSalinity from '@/components/GraphSalinity';
 import GraphTemperature from '@/components/GraphTemperature';
+import Max from '@/components/max';
+import Min from '@/components/min';
+import Mean from '@/components/mean';
+import Variance from '@/components/variance';
+import LogoutButton from '@/components/LogoutButton';
+
 import '@/styles/dashboardstyle.css';
 
 export default function Home() {
@@ -34,7 +40,7 @@ export default function Home() {
             <img src="setting.png" className="setting" alt="setting icon" />
             <img src="human.png" className="human" alt="human icon" />
             <span className="users-names">
-              이경직님 / 로그아웃
+              이경직님 / <LogoutButton />
             </span>
           </div>
         </div>
@@ -84,6 +90,101 @@ export default function Home() {
         <h3>수온</h3>
         <div className="chart-box">
           <GraphTemperature deviceId={deviceId} day={day} />
+        </div>
+      </div>
+      <div className="phs">
+        <span className="text-space">수소이온(pH)</span>
+        <div className="grid-1">
+          <div className="box-in-box">
+            <span className="box-text">평균</span>
+            <div className="box-horizontal">
+              <img src="average.png" className="box-pic"></img>
+              <span className="value">
+                <Mean sensor_name="wando01" sensor_value="hydrogen" what_value="ph" day={day} />
+              </span>
+            </div>
+          </div>
+
+          <div className="box-in-box">
+            <span className="box-text">분산</span>
+
+            <div className="box-horizontal">
+              <img src="variance.jpg" className="box-pic"></img>
+              <span className="value">
+                <Variance sensor_name="wando01" sensor_value="hydrogen" what_value="ph" day={day} />
+              </span>
+            </div>
+          </div>
+
+          <div className="box-in-box">
+            <span className="box-text">최솟값</span>
+
+            <div className="box-horizontal">
+              <img src="min.png" className="box-pic"></img>
+              <span className="value">
+                <Min sensor_name="wando01" sensor_value="hydrogen" what_value="ph" day={day} />
+              </span>
+            </div>
+          </div>
+
+          <div className="box-in-box">
+            <span className="box-text">최댓값</span>
+
+            <div className="box-horizontal">
+              <img src="max.png" className="box-pic"></img>
+              <span className="value">
+                <Max sensor_name="wando01" sensor_value="hydrogen" what_value="ph" day={day} />
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="TDS">
+        <span className="text-space">TDS(ppm)</span>
+        <div className="grid-2">
+          <div className="box-in-box">
+            <span className="box-text">평균</span>
+            <div className="box-horizontal">
+              <img src="average.png" className="box-pic"></img>
+              <span className="value">
+                <Mean sensor_name="wando01" sensor_value="conductivity" what_value="tds" day={day} />
+              </span>
+            </div>
+          </div>
+
+          <div className="box-in-box">
+            <span className="box-text">분산</span>
+
+            <div className="box-horizontal">
+              <img src="variance.jpg" className="box-pic"></img>
+              <span className="value">
+                <Variance sensor_name="wando01" sensor_value="conductivity" what_value="tds" day={day} />
+              </span>
+            </div>
+          </div>
+
+          <div className="box-in-box">
+            <span className="box-text">최솟값</span>
+
+            <div className="box-horizontal">
+              <img src="min.png" className="box-pic"></img>
+              <span className="value">
+                <Min sensor_name="wando01" sensor_value="conductivity" what_value="tds" day={day} />
+              </span>
+            </div>
+          </div>
+
+          <div className="box-in-box">
+            <span className="box-text">최댓값</span>
+
+            <div className="box-horizontal">
+              <img src="max.png" className="box-pic"></img>
+              <span className="value">
+                <Max sensor_name="wando01" sensor_value="conductivity" what_value="tds" day={day} />
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
