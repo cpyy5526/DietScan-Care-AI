@@ -14,7 +14,7 @@ export const authOptions: AuthOptions = {
         password: {
           label: 'Password',
           type: 'password',
-          placeholder: 'Enter your password'
+          placeholder: 'Enter your password',
         },
       },
       async authorize(credentials) {
@@ -32,15 +32,15 @@ export const authOptions: AuthOptions = {
 
         const isValidPassword =
             await bcrypt.compare(credentials.password, user.password);
-
         if (!isValidPassword) {
           throw new Error('Invalid password');
         }
 
+        // Prisma의 name 필드가 null일 경우 undefined로 변환
         return {
-          key_id: user.key_id,  // Adjust the casing to match your schema
+          key_id: user.key_id,
           id: user.id,
-          name: user.name,
+          name: user.name ?? undefined,  // null -> undefined 변환
         };
       },
     }),
@@ -48,10 +48,28 @@ export const authOptions: AuthOptions = {
   pages: {
     signIn: '/login',
     signOut: '/',
-    error: '/login',  // Redirect to login on error
+    error: '/login',
   },
   session: {
     strategy: 'jwt',
   },
   secret: process.env.NEXTAUTH_SECRET,
+  callbacks: {
+    async jwt({token, user}) {
+      if (user) {
+        token.key_id = user.key_id;
+        token.id = user.id;
+        token.name = user.name;
+      }
+      return token;
+    },
+    async session({session, token}) {
+      session.user = {
+        key_id: token.key_id as string,
+        id: token.id as string,
+        name: token.name as string | undefined,
+      };
+      return session;
+    },
+  },
 };
