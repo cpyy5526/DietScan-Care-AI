@@ -5,6 +5,9 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 import GraphOxygen from '@/components/GraphOxygen';
+import GraphCondoc from '@/components/GraphConduc';
+import GraphSalinity from '@/components/GraphSalinity';
+import GraphTemperature from '@/components/GraphTemperature';
 import '@/styles/dashboardstyle.css';
 
 export default function Home() {
@@ -67,14 +70,21 @@ export default function Home() {
       </div>
       <div className="chart sub-chart1">
         <h3>염도</h3>
-        
+        <div className="chart-box">
+          <GraphSalinity deviceId={deviceId} day={day} />
+        </div>
       </div>
       <div className="chart sub-chart2">
         <h3>전기전도도</h3>
-        
+        <div className="chart-box">
+          <GraphCondoc deviceId={deviceId} day={day} />
+        </div>
       </div>
       <div className="chart sub-chart3">
         <h3>수온</h3>
+        <div className="chart-box">
+          <GraphTemperature deviceId={deviceId} day={day} />
+        </div>
       </div>
     </div>
   );
