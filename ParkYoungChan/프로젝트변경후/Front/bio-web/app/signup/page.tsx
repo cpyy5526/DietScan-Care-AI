@@ -13,7 +13,7 @@ export default function RegisterPage() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const name = formData.get('name') as string;
-    const email = formData.get('email') as string;
+    const id = formData.get('id') as string;
     const password = formData.get('password') as string;
 
     try {
@@ -22,7 +22,7 @@ export default function RegisterPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, id, password }),
       });
 
       if (!response.ok) {
@@ -54,7 +54,7 @@ export default function RegisterPage() {
             <input type="text" name="name" placeholder="Name" required className="register-input" />
           </div>
           <div>
-            <input type="email" name="email" placeholder="Email" required className="register-input" />
+            <input type="text" name="id" placeholder="id" required className="register-input" />
           </div>
           <div>
             <input type="password" name="password" placeholder="Password" required className="register-input" />

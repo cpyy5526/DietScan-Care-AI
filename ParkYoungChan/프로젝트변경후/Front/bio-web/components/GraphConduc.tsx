@@ -37,7 +37,7 @@ export default function GraphCondoc({ deviceId, day }: GraphConducProps) {
     };
 
     fetchOxygenData();
-  }, [deviceId]);
+  }, [deviceId, day]);
 
   const formattedData = useMemo(
     () =>
@@ -52,7 +52,7 @@ export default function GraphCondoc({ deviceId, day }: GraphConducProps) {
     () => ({
       datasets: [
         {
-          label: 'Oxygen (ppm)',
+          label: 'Conductivity',
           data: formattedData,
           borderColor: '#FFA726',
           backgroundColor: 'rgb(255, 167, 38, 0.2)', // 진한 주황, 약간 투명
@@ -72,7 +72,7 @@ export default function GraphCondoc({ deviceId, day }: GraphConducProps) {
       },
       title: {
         display: true,
-        text: 'Oxygen PPM Time Series',
+        text: 'Conductivity Time Series',
       },
       tooltip: {
         callbacks: {
@@ -125,7 +125,7 @@ export default function GraphCondoc({ deviceId, day }: GraphConducProps) {
       y: {
         title: {
           display: true,
-          text: 'Oxygen (ppm)',
+          text: 'Conductivity',
         },
       },
     },

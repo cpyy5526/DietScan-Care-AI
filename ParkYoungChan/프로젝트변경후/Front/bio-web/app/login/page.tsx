@@ -12,18 +12,18 @@ export default function LoginPage() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
+    const id = formData.get('id') as string;
     const password = formData.get('password') as string;
 
     try {
       const result = await signIn('credentials', {
-        email,
+        id,
         password,
         redirect: false,
       });
 
       if (result?.error) {
-        setError('이메일 또는 비밀번호를 확인해주세요.');
+        setError('아이디 또는 비밀번호를 확인해주세요.');
       } else {
         router.push('/wando01');
       }
@@ -43,7 +43,7 @@ export default function LoginPage() {
         {error && <p className="login-error">{error}</p>}
         <form onSubmit={handleSubmit} className="login-form">
           <div>
-            <input type="email" name="email" placeholder="Email" required className="login-input" />
+            <input type="text" name="id" placeholder="id" required className="login-input" />
           </div>
           <div>
             <input type="password" name="password" placeholder="Password" required className="login-input" />

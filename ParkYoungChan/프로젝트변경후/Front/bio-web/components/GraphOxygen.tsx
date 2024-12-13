@@ -37,7 +37,7 @@ export default function GraphOxygen({ deviceId, day }: GraphOxygenProps) {
     };
 
     fetchOxygenData();
-  }, [deviceId]);
+  }, [deviceId, day]);
 
   const formattedData = useMemo(
     () =>
