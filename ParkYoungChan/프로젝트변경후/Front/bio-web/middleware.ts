@@ -5,10 +5,13 @@ export async function middleware(req) {
   const token = await getToken({req, secret: process.env.NEXTAUTH_SECRET});
 
   if (!token) {
-    // 로그인 페이지로 리다이렉트하면서 쿼리 파라미터로 메시지 전달
     const url = new URL('/login', req.url);
-    url.searchParams.set(
-        'error', 'authentication_required');  // 에러 메시지 추가
+
+    // 이미 error 쿼리 파라미터가 없을 때만 추가
+    if (!url.searchParams.has('error')) {
+      url.searchParams.set('error', 'authentication_required');
+    }
+
     return NextResponse.redirect(url);
   }
 
@@ -17,5 +20,6 @@ export async function middleware(req) {
 }
 
 export const config = {
-  matcher: ['/protected/:path*'],  // 보호할 경로 설정
+  matcher:
+      ['/protected/:path*', '/api/api_protect/:path*'],  // 보호할 경로 설정
 };

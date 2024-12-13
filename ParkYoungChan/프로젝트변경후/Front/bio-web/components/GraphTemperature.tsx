@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { Line } from 'react-chartjs-2';
-import { fetchData } from '@/app/api/fetchData';
+import { fetchData } from '@/app/api/api_protect/fetchData';
 
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, TimeScale, Title, Tooltip, Legend, Filler, ChartOptions } from 'chart.js';
 import 'chartjs-adapter-date-fns';

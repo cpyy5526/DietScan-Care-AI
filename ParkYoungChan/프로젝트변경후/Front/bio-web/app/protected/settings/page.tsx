@@ -60,6 +60,25 @@ export default function Setting() {
     }
   }, [isBackgroundActive]);
 
+  const deleteUser = async (id: string) => {
+    try {
+      const response = await fetch('/api/api_protect/users', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }), // 삭제할 ID 전달
+      });
+
+      if (response.ok) {
+        console.log('User deleted successfully');
+        setData((prevData) => prevData.filter((user) => user.user_id !== id)); // 상태 업데이트
+      } else {
+        console.error('Failed to delete user:', await response.json());
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error);
+    }
+  };
+
   // Unix timestamp를 yyyy-mm-dd로 변환하는 함수
   const formatUnixToDate = (unixTime: number) => {
     const date = new Date(unixTime); // Unix timestamp는 초 단위이므로 1000을 곱함
@@ -73,7 +92,7 @@ export default function Setting() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('/api/users'); // API 호출
+        const response = await fetch('/api/api_protect/users'); // API 호출
         const result = await response.json();
 
         // 날짜 변환 후 상태 업데이트
@@ -95,10 +114,6 @@ export default function Setting() {
   // Table의 컬럼 정의
   const columns = [
     {
-      title: '#',
-      dataIndex: 'number',
-    },
-    {
       title: '사용자 ID',
       dataIndex: 'id',
     },
@@ -110,6 +125,14 @@ export default function Setting() {
     {
       title: '등록일',
       dataIndex: 'regi_date', // 변환된 날짜 표시
+    },
+    {
+      title: '사용자 삭제',
+      render: (_, record) => (
+        <button onClick={() => deleteUser(record.id)} style={{ color: 'red' }}>
+          삭제
+        </button>
+      ),
     },
   ];
 
@@ -152,21 +175,6 @@ export default function Setting() {
           dataSource={data}
           loading={loading} // 로딩 상태 추가
         />
-      </div>
-
-      <div className="add-del">
-        <nav aria-label="Page navigation example">
-          <ul className="pagination ">
-            <li className="page-item">
-              <a className="page-link">수정</a>
-            </li>
-            <li className="page-item">
-              <a className="page-link" href="#">
-                삭제
-              </a>
-            </li>
-          </ul>
-        </nav>
       </div>
 
       <div className="footer1">
