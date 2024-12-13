@@ -1,13 +1,21 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, FormEvent } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
-import '@//styles/login.css';
+import '@/styles/login.css';
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams(); // 쿼리 파라미터 읽기
+
+  useEffect(() => {
+    const errorParam = searchParams.get('error');
+    if (errorParam === 'authentication_required') {
+      setError('접근하려면 로그인이 필요합니다.');
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -25,7 +33,7 @@ export default function LoginPage() {
       if (result?.error) {
         setError('아이디 또는 비밀번호를 확인해주세요.');
       } else {
-        router.push('/wando01');
+        router.push('protected/wando01');
       }
     } catch (err) {
       setError('로그인 중 오류가 발생했습니다.');

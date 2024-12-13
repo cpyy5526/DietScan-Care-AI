@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import React, { useState } from 'react';
 import GraphOxygen from '@/components/GraphOxygen';
 import GraphCondoc from '@/components/GraphConduc';
@@ -15,13 +16,13 @@ import Min from '@/components/min';
 import Mean from '@/components/mean';
 import Variance from '@/components/variance';
 import LogoutButton from '@/components/LogoutButton';
-import { useBackgroundContext } from '@/app/test/context';
+import { useBackgroundContext } from '@/app/protected/test/context';
 import Dayselect from '@/components/Dayselect';
 
 import '@/styles/dashboardstyle.css';
 
 export default function Home() {
-  const deviceId = 'wando01';
+  const deviceId = 'wando01b';
   const router = useRouter();
 
   const [error, setError] = useState<string | null>(null);
@@ -33,14 +34,14 @@ export default function Home() {
   };
 
   const goToNextPage = () => {
-    router.push('/wando01b'); // 이동할 페이지 경로
+    router.push('./wando02'); // 이동할 페이지 경로
   };
 
   const goToPreviousPage = () => {
-    router.push('/wando02'); // 이동할 페이지 경로
+    router.push('./wando01'); // 이동할 페이지 경로
   };
   const goToSettingpage = () => {
-    router.push('/settings');
+    router.push('./settings');
   };
 
   const { isBackgroundActive, setIsBackgroundActive } = useBackgroundContext();
@@ -77,19 +78,17 @@ export default function Home() {
           <div className="info-right">
             <p className="sensor-name">{deviceId} 센서 데이터</p>
             <div className="details">
-              <img src="setting.png" className="setting" alt="setting icon" onClick={goToSettingpage} />
-              <img src="human.png" className="human" alt="human icon" />
+              <img src="/setting.png" className="setting" alt="setting icon" onClick={goToSettingpage} />
+              <img src="/human.png" className="human" alt="human icon" />
               <span className="users-names">
-                이경직님 / <LogoutButton />
+                user / <LogoutButton />
               </span>
             </div>
           </div>
         </div>
 
         <div className="estimate-bf-total">
-          <div className="ebt-text">
-            <span className="text-space1">최근에 예측한 바이오파울링 시간</span> <span className="text-space1">위험도</span>
-          </div>
+          <div className="ebt-text"></div>
           <div className="inference">
             <RangeData deviceId={deviceId} day={day} />
           </div>
@@ -107,12 +106,12 @@ export default function Home() {
           <div className="bio-result">
             <Latest deviceId={deviceId} />
           </div>
-          <img src="Wave1.png" className="wave1"></img>
-          <img src="Wave2.png" className="wave2"></img>
+          <img src="/Wave1.png" className="wave1"></img>
+          <img src="/Wave2.png" className="wave2"></img>
           <div className="nd-column">
             <span className="text-space">바이오파울링 예측 결과</span>
             <div className="nd-row">
-              <img src="danger.png" className="siren"></img>
+              <img src="/danger.png" className="siren"></img>
             </div>
           </div>
         </div>
@@ -146,7 +145,7 @@ export default function Home() {
             <div className="box-in-box">
               <span className="box-text">평균</span>
               <div className="box-horizontal">
-                <img src="average.png" className="box-pic"></img>
+                <img src="/average.png" className="box-pic"></img>
                 <span className="value">
                   <Mean sensor_name={deviceId} sensor_value="hydrogen" what_value="ph" day={day} />
                 </span>
@@ -157,7 +156,7 @@ export default function Home() {
               <span className="box-text">분산</span>
 
               <div className="box-horizontal">
-                <img src="variance.jpg" className="box-pic"></img>
+                <img src="/variance.jpg" className="box-pic"></img>
                 <span className="value">
                   <Variance sensor_name={deviceId} sensor_value="hydrogen" what_value="ph" day={day} />
                 </span>
@@ -168,7 +167,7 @@ export default function Home() {
               <span className="box-text">최솟값</span>
 
               <div className="box-horizontal">
-                <img src="min.png" className="box-pic"></img>
+                <img src="/min.png" className="box-pic"></img>
                 <span className="value">
                   <Min sensor_name={deviceId} sensor_value="hydrogen" what_value="ph" day={day} />
                 </span>
@@ -179,7 +178,7 @@ export default function Home() {
               <span className="box-text">최댓값</span>
 
               <div className="box-horizontal">
-                <img src="max.png" className="box-pic"></img>
+                <img src="/max.png" className="box-pic"></img>
                 <span className="value">
                   <Max sensor_name={deviceId} sensor_value="hydrogen" what_value="ph" day={day} />
                 </span>
@@ -194,7 +193,7 @@ export default function Home() {
             <div className="box-in-box">
               <span className="box-text">평균</span>
               <div className="box-horizontal">
-                <img src="average.png" className="box-pic"></img>
+                <img src="/average.png" className="box-pic"></img>
                 <span className="value">
                   <Mean sensor_name={deviceId} sensor_value="conductivity" what_value="tds" day={day} />
                 </span>
@@ -205,7 +204,7 @@ export default function Home() {
               <span className="box-text">분산</span>
 
               <div className="box-horizontal">
-                <img src="variance.jpg" className="box-pic"></img>
+                <img src="/variance.jpg" className="box-pic"></img>
                 <span className="value">
                   <Variance sensor_name={deviceId} sensor_value="conductivity" what_value="tds" day={day} />
                 </span>
@@ -216,7 +215,7 @@ export default function Home() {
               <span className="box-text">최솟값</span>
 
               <div className="box-horizontal">
-                <img src="min.png" className="box-pic"></img>
+                <img src="/min.png" className="box-pic"></img>
                 <span className="value">
                   <Min sensor_name={deviceId} sensor_value="conductivity" what_value="tds" day={day} />
                 </span>
@@ -227,7 +226,7 @@ export default function Home() {
               <span className="box-text">최댓값</span>
 
               <div className="box-horizontal">
-                <img src="max.png" className="box-pic"></img>
+                <img src="/max.png" className="box-pic"></img>
                 <span className="value">
                   <Max sensor_name={deviceId} sensor_value="conductivity" what_value="tds" day={day} />
                 </span>
@@ -245,5 +244,3 @@ export default function Home() {
     </>
   );
 }
-
-// {oxygen.length > 0 && <GraphOxygen result={oxygen} />}

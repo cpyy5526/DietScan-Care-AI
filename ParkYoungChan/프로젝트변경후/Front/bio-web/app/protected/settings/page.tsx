@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { useBackgroundContext } from '@/app/test/context';
+import { useBackgroundContext } from '@/app/protected/test/context';
 import { Divider, Radio, Table } from 'antd';
 import '@/styles/setting.css';
 

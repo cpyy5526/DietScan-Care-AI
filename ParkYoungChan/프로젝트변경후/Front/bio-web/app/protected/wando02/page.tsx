@@ -15,7 +15,7 @@ import Min from '@/components/min';
 import Mean from '@/components/mean';
 import Variance from '@/components/variance';
 import LogoutButton from '@/components/LogoutButton';
-import { useBackgroundContext } from '@/app/test/context';
+import { useBackgroundContext } from '@/app/protected/test/context';
 import Dayselect from '@/components/Dayselect';
 
 import '@/styles/dashboardstyle.css';

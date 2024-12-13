@@ -1,7 +1,7 @@
 import localFont from 'next/font/local';
 // import './style.css';
 import { AnimatePresence, motion } from 'framer-motion';
-import BackgroundProvider from '@/app/test/context';
+import BackgroundProvider from '@/app/protected/test/context';
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',

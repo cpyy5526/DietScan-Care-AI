@@ -1,12 +1,21 @@
-import {withAuth} from 'next-auth/middleware';
+import {getToken} from 'next-auth/jwt';
+import {NextResponse} from 'next/server';
 
-export default withAuth({
-  pages: {
-    signIn: '/login',  // 인증되지 않은 사용자가 이동할 페이지
-  },
-});
+export async function middleware(req) {
+  const token = await getToken({req, secret: process.env.NEXTAUTH_SECRET});
 
-// 보호할 경로 설정
+  if (!token) {
+    // 로그인 페이지로 리다이렉트하면서 쿼리 파라미터로 메시지 전달
+    const url = new URL('/login', req.url);
+    url.searchParams.set(
+        'error', 'authentication_required');  // 에러 메시지 추가
+    return NextResponse.redirect(url);
+  }
+
+  // 인증된 경우 요청을 계속 처리
+  return NextResponse.next();
+}
+
 export const config = {
-  matcher: ['/wando01', '/wando02', '/wando01b'],  // 보호할 경로를 지정
+  matcher: ['/protected/:path*'],  // 보호할 경로 설정
 };

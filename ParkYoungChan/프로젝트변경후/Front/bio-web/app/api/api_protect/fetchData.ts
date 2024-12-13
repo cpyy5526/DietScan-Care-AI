@@ -1,9 +1,11 @@
 // app/api/fetchData.ts
 export async function fetchData(device_id: string, value: string, day: number) {
-  const baseUrl = 'https://rojy53nt54.execute-api.ap-northeast-2.amazonaws.com/Prod/';
-  const oneDayAgo = day - 24 * 60 * 60 * 1000;
+  const baseUrl =
+      'https://rojy53nt54.execute-api.ap-northeast-2.amazonaws.com/Prod/';
+  const oneDayAfter = day + 24 * 60 * 60 * 1000;
   // 최종 URL 생성
-  const url = `${baseUrl}/devices/${device_id}/sensors/${value}?b_time=${oneDayAgo}&a_time=${day}&size=10000`;
+  const url = `${baseUrl}/devices/${device_id}/sensors/${value}?b_time=${
+      day}&a_time=${oneDayAfter}&size=10000`;
 
   // Fetch 요청
   const response = await fetch(url);
