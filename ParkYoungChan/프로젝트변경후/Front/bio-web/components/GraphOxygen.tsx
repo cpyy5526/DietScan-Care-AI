@@ -1,8 +1,6 @@
-'use client';
-
 import React, { useEffect, useState, useMemo } from 'react';
 import { Line } from 'react-chartjs-2';
-import { fetchData } from '@/app/api/fetchData';
+import { fetchData } from '@/app/api/api_protect/fetchData';
 
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, TimeScale, Title, Tooltip, Legend, Filler, ChartOptions } from 'chart.js';
 import 'chartjs-adapter-date-fns';
@@ -17,19 +15,25 @@ interface ResultItem {
   };
 }
 
+interface RangeDataItem {
+  key: number;
+  inference_time: string;
+  inference_result: string;
+}
+
 interface GraphOxygenProps {
   deviceId: string;
   day: number;
+  data: RangeDataItem[]; // data는 RangeDataItem 타입의 배열
 }
 
-export default function GraphOxygen({ deviceId, day }: GraphOxygenProps) {
+export default function GraphOxygen({ deviceId, day, data }: GraphOxygenProps) {
   const [oxygen, setOxygen] = useState<ResultItem[]>([]);
 
   useEffect(() => {
     const fetchOxygenData = async () => {
       try {
         const data = await fetchData(deviceId, 'oxygen', day); // fetchData 호출
-        console.log('Data fetched:', data); // 콘솔에 데이터 출력
         setOxygen(data);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -39,14 +43,29 @@ export default function GraphOxygen({ deviceId, day }: GraphOxygenProps) {
     fetchOxygenData();
   }, [deviceId, day]);
 
-  const formattedData = useMemo(
-    () =>
-      oxygen.map((item) => ({
+  const formattedData = useMemo(() => {
+    const redRanges = data
+      .filter((d) => d.inference_result === 'O')
+      .map((d) => {
+        const inferenceTime = new Date(d.inference_time).getTime();
+        return {
+          start: inferenceTime - 60 * 60 * 1000, // 1시간 전
+          end: inferenceTime,
+        };
+      });
+
+    return oxygen.map((item) => {
+      const isInRedRange = redRanges.some((range) => item.measure_time >= range.start && item.measure_time <= range.end);
+
+      return {
         x: new Date(item.measure_time), // 13자리 Unix timestamp
         y: item.oxygen_ppm.value,
-      })),
-    [oxygen]
-  );
+        pointBackgroundColor: isInRedRange ? 'red' : '#4FC3F7', // 빨간색 또는 기본 색
+        pointBorderColor: isInRedRange ? 'darkred' : '#4FC3F7',
+        pointRadius: isInRedRange ? 6 : 3, // 강조된 포인트는 크기를 크게
+      };
+    });
+  }, [oxygen, data]);
 
   const chartData = useMemo(
     () => ({
@@ -57,6 +76,8 @@ export default function GraphOxygen({ deviceId, day }: GraphOxygenProps) {
           borderColor: '#4FC3F7',
           backgroundColor: 'rgba(79, 195, 247, 0.2)', // 진한 초록색, 약간 투명
           fill: true,
+          pointBackgroundColor: formattedData.map((d) => d.pointBackgroundColor), // 각각의 포인트 색상
+          pointRadius: formattedData.map((d) => d.pointRadius), // 각각의 포인트 크기
         },
       ],
     }),
@@ -71,7 +92,7 @@ export default function GraphOxygen({ deviceId, day }: GraphOxygenProps) {
         position: 'top',
       },
       title: {
-        display: true,
+        display: false,
         text: 'Oxygen PPM Time Series',
       },
       tooltip: {

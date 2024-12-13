@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { fetchData } from '@/app/api/fetchData';
+import { fetchData } from '@/app/api/api_protect/fetchData';
 
 export default function Statistical({ sensor_name, sensor_value, what_value, day }) {
   const [oxygenValues, setOxygenValues] = useState([]); // 데이터를 저장할 상태

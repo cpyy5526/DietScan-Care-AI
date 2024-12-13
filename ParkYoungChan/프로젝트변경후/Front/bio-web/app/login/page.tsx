@@ -13,6 +13,10 @@ export default function LoginPage() {
   useEffect(() => {
     const errorParam = searchParams.get('error');
     if (errorParam === 'authentication_required') {
+      // URL에서 error 쿼리 파라미터 제거
+      const currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.delete('error');
+      router.replace(currentUrl.toString());
       setError('접근하려면 로그인이 필요합니다.');
     }
   }, [searchParams]);
@@ -33,7 +37,7 @@ export default function LoginPage() {
       if (result?.error) {
         setError('아이디 또는 비밀번호를 확인해주세요.');
       } else {
-        router.push('protected/wando01');
+        router.push('protected');
       }
     } catch (err) {
       setError('로그인 중 오류가 발생했습니다.');
