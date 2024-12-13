@@ -22,6 +22,12 @@ import Dayselect from '@/components/Dayselect';
 import '@/styles/dashboardstyle.css';
 import { log } from 'console';
 
+interface HomeProps {
+  deviceId: string;
+  nextPage: string;
+  prevPage: string;
+}
+
 async function fetchRangeData(sensor_id: string, start_time: string, end_time: string) {
   const response = await fetch(`/api/api_protect/range?sensor_id=${sensor_id}&start_time=${start_time}&end_time=${end_time}`);
   if (!response.ok) {
@@ -30,7 +36,7 @@ async function fetchRangeData(sensor_id: string, start_time: string, end_time: s
   return response.json();
 }
 
-export default function Home({ deviceId, nextPage, prevPage }: { deviceId: string; nextPage: string; prevPage: string }) {
+export default function Home({ deviceId, nextPage, prevPage }: HomeProps) {
   const router = useRouter();
   const { data: session } = useSession();
 
@@ -159,19 +165,19 @@ export default function Home({ deviceId, nextPage, prevPage }: { deviceId: strin
         <div className="chart sub-chart1">
           <h3>염도</h3>
           <div className="chart-box">
-            <GraphSalinity deviceId={deviceId} day={day} />
+            <GraphSalinity deviceId={deviceId} day={day} data={data} />
           </div>
         </div>
         <div className="chart sub-chart2">
           <h3>전기전도도</h3>
           <div className="chart-box">
-            <GraphCondoc deviceId={deviceId} day={day} />
+            <GraphCondoc deviceId={deviceId} day={day} data={data} />
           </div>
         </div>
         <div className="chart sub-chart3">
           <h3>수온</h3>
           <div className="chart-box">
-            <GraphTemperature deviceId={deviceId} day={day} />
+            <GraphTemperature deviceId={deviceId} day={day} data={data} />
           </div>
         </div>
         <div className="phs">
@@ -223,7 +229,7 @@ export default function Home({ deviceId, nextPage, prevPage }: { deviceId: strin
         </div>
 
         <div className="TDS">
-          <span className="text-space">TDS(ppm)</span>
+          <span className="text-space">TDS(mg/L)</span>
           <div className="grid-2">
             <div className="box-in-box">
               <span className="box-text">평균</span>
@@ -272,12 +278,8 @@ export default function Home({ deviceId, nextPage, prevPage }: { deviceId: strin
       </div>
 
       {/* Navigation Buttons */}
-      <button className="btn_left" onClick={goToPreviousPage}>
-        이전
-      </button>
-      <button className="btn_right" onClick={goToNextPage}>
-        다음
-      </button>
+      <div className="btn_left" onClick={goToPreviousPage}></div>
+      <div className="btn_right" onClick={goToNextPage}></div>
     </>
   );
 }
