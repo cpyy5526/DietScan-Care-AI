@@ -25,7 +25,7 @@ export default function LoginPage() {
       if (result?.error) {
         setError('이메일 또는 비밀번호를 확인해주세요.');
       } else {
-        router.push('/dashboard');
+        router.push('/wando01');
       }
     } catch (err) {
       setError('로그인 중 오류가 발생했습니다.');
