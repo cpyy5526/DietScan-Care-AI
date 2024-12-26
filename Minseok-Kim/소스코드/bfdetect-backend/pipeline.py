@@ -8,9 +8,10 @@ import json
 import joblib
 import os
 import logging
-from httpx import AsyncClient
+import httpx, asyncio
 
 BASE_URL = 'https://rojy53nt54.execute-api.ap-northeast-2.amazonaws.com/Prod'
+RETRIES = 5
 
 # GRU 모델 클래스 정의
 class GRUModel(nn.Module):
@@ -25,37 +26,10 @@ class GRUModel(nn.Module):
         return out
 
 
-# 1. Get Access Token
-def get_access_token():
-    """API 액세스 토큰을 획득합니다."""
-    url = os.getenv("API_AUTH_URL")
-    username = os.getenv("API_USERNAME")
-    password = os.getenv("API_PASSWORD")
-    
-    if not all([url, username, password]):
-        raise EnvironmentError("API credentials or URL are not properly set in environment variables.")
-
-    data = {
-        'username': username,
-        'password': password
-    }
-    headers = {
-        'Content-Type': 'application/x-www-form-urlencoded'
-    }
-    response = requests.post(url, data=data, headers=headers)
-    response.raise_for_status()  # HTTP 오류가 있을 경우 예외 발생
-    access_token = response.json().get("access_token")
-
-    if not access_token:
-        raise ValueError("Access token not found in the response.")
-
-    return access_token
-
-
-# 2. Collect Recent Data
-async def collect_recent_data(device_id, token, sequence_length=720):
+# Collect Data
+async def collect_data(device_id, end_time, sequence_length=720):
     """
-    최근 sequence_length 개수만큼의 데이터를 수집합니다.
+    주어진 시점 기준으로 이전 sequence_length 개수만큼의 데이터를 수집합니다.
     Args:
         device_id (str): 장치 ID.
         token (str): API 액세스 토큰.
@@ -65,7 +39,6 @@ async def collect_recent_data(device_id, token, sequence_length=720):
     """
     # API URL 및 시간 범위 설정
     url =  BASE_URL + f'/devices/{device_id}/sensors/oxygen'
-    end_time = datetime.now()
     start_time = end_time - timedelta(days=2)  # 데이터 수집을 위한 여유 기간
 
     headers = {
@@ -79,29 +52,41 @@ async def collect_recent_data(device_id, token, sequence_length=720):
         "size": sequence_length * 2  # 여유있게 2배 수집
     }
 
-    # API 요청
-    async with AsyncClient() as client:
-        response = await client.get(url, params=params, headers=headers)
-        response.raise_for_status()  # HTTP 상태 코드 확인
-        data = response.json()
+    logger = logging.getLogger(__name__)
 
-    # 응답 데이터 처리
-    if isinstance(data, list):
-        df = pd.DataFrame(data)
-    elif isinstance(data, dict) and 'result' in data:
-        df = pd.DataFrame(data['result'])
-    else:
-        raise ValueError("Unexpected data format received from API.")
+    for attempt in range(RETRIES):
+        try: 
+            # API 요청
+            async with httpx.AsyncClient(timeout=10) as client:
+                response = await client.get(url, params=params, headers=headers)
+                response.raise_for_status()  # HTTP 상태 코드 확인
+                data = response.json()
 
-    # 데이터 개수 확인
-    if len(df) < sequence_length:
-        raise ValueError(f"Insufficient data: only {len(df)} records available, {sequence_length} required.")
+            # 응답 데이터 처리
+            if isinstance(data, list):
+                df = pd.DataFrame(data)
+            elif isinstance(data, dict) and 'result' in data:
+                df = pd.DataFrame(data['result'])
+            else:
+                raise ValueError("Unexpected data format received from API.")
 
-    # 최근 sequence_length개의 데이터 반환
-    return df.tail(sequence_length)
+            # 데이터 개수 확인
+            if len(df) < sequence_length:
+                raise ValueError(f"Insufficient data: only {len(df)} records available, {sequence_length} required.")
+
+            # 최근 sequence_length개의 데이터 반환
+            return df.tail(sequence_length)
+        except (httpx.RequestError, httpx.TimeoutException) as e:
+            if attempt < RETRIES - 1:
+                backoff_time = 2 ** attempt
+                logger.info("Retrying in {backoff_time} seconds due to error: {e}")
+                await asyncio.sleep(backoff_time)
+            else:
+                logger.error(f"All retries failed for {device_id}. Error: {e}")
+                raise e
 
 
-# 3. Preprocess Data
+# Preprocess Data
 def preprocess_data(df):
     """
     수집된 데이터를 전처리합니다.
@@ -134,7 +119,7 @@ def preprocess_data(df):
     return X, df
     
 
-# 4. Load Model
+# Load Model
 def load_model(model_path):
     """
     저장된 GRU 모델을 로드합니다.
@@ -167,7 +152,7 @@ def load_model(model_path):
     return model, device
     
 
-# 5. Predict Results
+# Predict Results
 def predict_anomaly(model, data, device):
     """
     모델을 사용하여 이상 여부를 예측합니다.
@@ -185,5 +170,5 @@ def predict_anomaly(model, data, device):
         _, predicted = torch.max(outputs, 1)  # 가장 높은 확률의 클래스
         # probabilities = torch.nn.functional.softmax(outputs, dim=1)  # 확률 분포 계산
 
-        return predicted.item(),  # 예측된 클래스
+        return predicted.item()  # 예측된 클래스
         # "probabilities": probabilities[0].cpu().tolist()  # 확률 분포를 리스트로 반환
