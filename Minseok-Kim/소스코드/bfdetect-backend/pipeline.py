@@ -8,6 +8,7 @@ import json
 import joblib
 import os
 import logging
+from httpx import AsyncClient
 
 # GRU 모델 클래스 정의
 class GRUModel(nn.Module):
@@ -49,7 +50,7 @@ def get_access_token():
 
 
 # 2. Collect Recent Data
-def collect_recent_data(device_id, token, sequence_length=720):
+async def collect_recent_data(device_id, token, sequence_length=720):
     """
     최근 sequence_length 개수만큼의 데이터를 수집합니다.
     Args:
@@ -60,11 +61,8 @@ def collect_recent_data(device_id, token, sequence_length=720):
         dict: 수집된 데이터
     """
     # API URL 및 시간 범위 설정
-    url = 'https://rojy53nt54.execute-api.ap-northeast-2.amazonaws.com/Prod/'# os.getenv("API_BASE_URL")
-    if not url:
-        raise EnvironmentError("URL is not properly set in environment variables.")
-
-    url = url + f'/devices/{device_id}/sensors/oxygen'
+    url = 'https://rojy53nt54.execute-api.ap-northeast-2.amazonaws.com/Prod/' + \
+          f'/devices/{device_id}/sensors/oxygen'
     end_time = datetime.now()
     start_time = end_time - timedelta(days=2)  # 데이터 수집을 위한 여유 기간
 
@@ -80,9 +78,10 @@ def collect_recent_data(device_id, token, sequence_length=720):
     }
 
     # API 요청
-    response = requests.get(url, params=params, headers=headers)
-    response.raise_for_status()  # HTTP 상태 코드 확인
-    data = response.json()
+    async with AsyncClient() as client:
+        response = await client.get(url, params=params, headers=headers)
+        response.raise_for_status()  # HTTP 상태 코드 확인
+        data = response.json()
 
     # 응답 데이터 처리
     if isinstance(data, list):
