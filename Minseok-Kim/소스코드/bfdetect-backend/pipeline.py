@@ -10,6 +10,8 @@ import os
 import logging
 from httpx import AsyncClient
 
+BASE_URL = 'https://rojy53nt54.execute-api.ap-northeast-2.amazonaws.com/Prod'
+
 # GRU 모델 클래스 정의
 class GRUModel(nn.Module):
     def __init__(self, input_size, hidden_size, output_size, num_layers=1):
@@ -21,6 +23,7 @@ class GRUModel(nn.Module):
         out, _ = self.gru(x)
         out = self.fc(out[:, -1, :])
         return out
+
 
 # 1. Get Access Token
 def get_access_token():
@@ -61,8 +64,7 @@ async def collect_recent_data(device_id, token, sequence_length=720):
         dict: 수집된 데이터
     """
     # API URL 및 시간 범위 설정
-    url = 'https://rojy53nt54.execute-api.ap-northeast-2.amazonaws.com/Prod/' + \
-          f'/devices/{device_id}/sensors/oxygen'
+    url =  BASE_URL + f'/devices/{device_id}/sensors/oxygen'
     end_time = datetime.now()
     start_time = end_time - timedelta(days=2)  # 데이터 수집을 위한 여유 기간
 
@@ -129,7 +131,7 @@ def preprocess_data(df):
     X = df[features].values
     X = torch.FloatTensor(X).unsqueeze(0)  # 배치 차원 추가
     
-    return {"tensor": X, "processed_df": df}
+    return X, df
     
 
 # 4. Load Model
