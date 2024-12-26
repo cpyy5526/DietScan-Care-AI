@@ -44,7 +44,7 @@ async def runModel(sensor_id: str, time: Optional[datetime]=None):
         async with semaphore:
             data = await pipeline.collect_data(sensor_id, time)
             logger.info(f"[\'{sensor_id}\' at {time}] Collected data from the server.")
-            await asyncio.sleep(1)
+            await asyncio.sleep(2)
 
         # 데이터 전처리
         processed_data, dataframe = pipeline.preprocess_data(data)
@@ -77,17 +77,6 @@ async def runModelWrapper(sensor_id: str, time: datetime):
         logger.error("Task timed out.")
 
 
-# 과거 기록된 데이터에 대해서 모델 실행 및 결과 기록
-async def populatePastData(sensor_id: str, start_time: datetime, end_time: datetime):
-    try:
-        time = start_time
-        while time <= end_time:
-            await asyncio.wait_for(runModel(sensor_id, time), 30)
-            time += timedelta(hours=1)
-    except asyncio.TimeoutError:
-        logger.error("Task timed out.")
-
-
 # 서버 시작
 @app.on_event("startup")
 async def startService():
@@ -104,17 +93,6 @@ async def startService():
         logger.info("Scheduler started.")
     except Exception as e:
         logger.error(str(e), exc_info=True)
-
-
-# 기존 테이블에 저장된 데이터 삭제
-@app.delete("/clear")
-async def clear():
-    try:
-        await database.clearResults()
-        logging.info("All recorded results have been cleared.")
-        return {"status": "success"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to clear results: {str(e)}")
     
 
 class Result(BaseModel):
@@ -150,6 +128,18 @@ async def resultsByTime(sensor_id: str, start_time: str, end_time: str):
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
+'''
+# 과거 기록된 데이터에 대해서 모델 실행 및 결과 기록
+async def populatePastData(sensor_id: str, start_time: datetime, end_time: datetime):
+    time = start_time
+    while time <= end_time:
+        try:
+            await asyncio.wait_for(runModel(sensor_id, time), 30)
+        except asyncio.TimeoutError:
+            logger.error(f"Task timed out for {sensor_id} at {time}. Retrying next hour...")
+            await asyncio.sleep(2)
+        time += timedelta(hours=1)
+
 @app.post("/populate/{sensor_id}")
 async def populate(
         background_tasks: BackgroundTasks,
@@ -165,3 +155,15 @@ async def populate(
     except Exception as e:
         logger.error(f"An error occured populating past results for \'{sensor_id}\': {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to populate past results: {str(e)}")
+
+
+# 기존 테이블에 저장된 데이터 삭제
+@app.delete("/clear")
+async def clear():
+    try:
+        await database.clearResults()
+        logging.info("All recorded results have been cleared.")
+        return {"status": "success"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to clear results: {str(e)}")
+'''

@@ -22,5 +22,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # 애플리케이션 코드 복사
 COPY . .
+RUN mkdir -p /app/data && touch /app/data/main.log /app/data/results.db
+
+# 시간대를 한국 기준으로 설정
+ENV TZ=Asia/Seoul
 
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
