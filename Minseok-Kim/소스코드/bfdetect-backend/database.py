@@ -2,7 +2,7 @@ import sqlite3
 import datetime
 
 # 데이터베이스 경로
-DB_PATH = "results.db"
+DB_PATH = "/app/data/results.db"
 
 def initialize():
     with sqlite3.connect(DB_PATH) as conn:

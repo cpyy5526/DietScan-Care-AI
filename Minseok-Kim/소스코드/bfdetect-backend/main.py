@@ -2,16 +2,31 @@ import pipeline, database
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.executors.asyncio import AsyncIOExecutor
 from apscheduler.triggers.cron import CronTrigger
 import os, asyncio, logging, requests
 
 SENSOR_IDS = ["wando01", "wando02", "wando01b"]
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
 app = FastAPI()
+
+logger = logging.getLogger(__name__)
+if logger.hasHandlers():
+    logger.handlers.clear()
+
+logging.basicConfig(level=logging.INFO)
+console_handler = logging.StreamHandler()
+file_handler = logging.FileHandler("/app/data/main.log")
+
+console_formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
+file_formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
+console_handler.setFormatter(console_formatter)
+file_handler.setFormatter(file_formatter)
+
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
+logger.setLevel(logging.INFO)
 
 
 # 센서 하나에 대해 바이오파울링 예측 모델 실행
@@ -19,99 +34,90 @@ app = FastAPI()
 async def runModel(sensor_id: str):
     try:
         # 데이터 수집
-        data_response = pipeline.collect_recent_data(sensor_id, app.state.token)
-        if data_response["status"] != "success":
-            raise Exception(data_response["message"])
-        df = data_response["data"]
+        try:
+            # data = pipeline.collect_recent_data(sensor_id, app.state.token)
+            data = pipeline.collect_recent_data(sensor_id, None)
+            logger.info(f"\'{sensor_id}\': Collected data from the server.")
+        except requests.exceptions.RequestException as e:
+            logger.error(f"API request error: {e}")
+        except ValueError as e:
+            logger.error(f"Data processing error: {e}")
 
         # 데이터 전처리
-        preprocess_response = pipeline.preprocess_data(df)
-        if preprocess_response["status"] != "success":
-            raise Exception(preprocess_response["message"])
+        preprocess_response = pipeline.preprocess_data(data)
         processed_data = preprocess_response["tensor"]
+        logger.info(f"\'{sensor_id}\': Data preprocessing completed.")
 
         # 모델 로드
-        model_path = "model.pth"  # 모델 경로 (실제 경로로 수정 필요)
-        model_response = pipeline.load_model(model_path)
-        if model_response["status"] != "success":
-            raise Exception(model_response["message"])
-        model = model_response["model"]
-        device = model_response["device"]
+        model, device = pipeline.load_model("model.pth")
 
-        # 예측
-        prediction_response = pipeline.predict_anomaly(model, processed_data, device)
-        if prediction_response["status"] != "success":
-            raise Exception(prediction_response["message"])
-        
-        return 1 if prediction_response["predicted_class"] == 1 else 0
+        # 예측 및 저장
+        result = pipeline.predict_anomaly(model, processed_data, device)  
+        logger.info(f"\'{sensor_id}\': Prediction has been successfully completed.")
+        database.saveResult(sensor_id, 1 if result == 1 else 0)
+
     except Exception as e:
-        logger.error("Error: " + str(e), exc_info=True)
+        logger.error(str(e), exc_info=True)
+        logger.info("Prediction for \'{sensor_id}\' failed.")
         return None
-
-
-# 등록된 모든 센서에 대해 예측 모델 실행
-async def runModelForAllSensors():
-    logger.info("Starting AI processing for all sensors...")
-    tasks = [runModel(sensor_id) for sensor_id in SENSOR_IDS]
-    results = await asyncio.gather(*tasks)
-    for sensor_id, result in results.items():
-        database.saveResult(sensor_id, result)
-
-
-# 정각마다 모든 센서에 대해 바이오파울링 예측 모델 실행하도록 스케줄링
-scheduler = BackgroundScheduler()
-trigger = CronTrigger(minute="0")  # 정각(##:00)마다 실행
-scheduler.add_job(runModelForAllSensors, trigger)
 
 
 # 서버 시작
 @app.on_event("startup")
-def start_scheduler():
-    scheduler.start()
-    database.initialize()
-    logger.info("Scheduler started.")
-
-    # 오든 API 보안 토큰 획득
+async def start_scheduler():
     try:
-        token_response = pipeline.get_access_token()
-        if token_response["status"] != "success":
-            raise Exception(token_response["message"])
-        app.state.token = token_response["access_token"]
+        database.initialize()
+        # app.state.token = pipeline.get_access_token()  # 오든 API 토큰 획득
+
+        # 1시간마다 모든 센서에 대해 모델을 실행하도록 스케줄링
+        scheduler = AsyncIOScheduler(executors={"default": AsyncIOExecutor()})
+        trigger = CronTrigger(minute="*/1")   # for test
+        # trigger = CronTrigger(minute="0")   # 정각(##:00)마다 실행
+        for sensor_id in SENSOR_IDS:
+            scheduler.add_job(runModel, trigger, args=[sensor_id],
+                              id=f"job_{sensor_id}", max_instances=3)
+        scheduler.start()
+        logger.info("Scheduler started.")
+    
     except Exception as e:
-        logger.error("Error: " + str(e), exc_info=True)
-
-
-# 서버 종료: 스케줄러도 같이 종료
-@app.on_event("shutdown")
-def shutdown_scheduler():
-    scheduler.shutdown()
-    logger.info("Scheduler shut down.")
-
+        logger.error(str(e), exc_info=True)
+    
 
 class Result(BaseModel):
     sensor_id: str
     inference_time: str
     inference_result: Optional[int]
 
-
 # 센서의 가장 최근 바이오파울링 판단 결과를 DB에서 가져옴
 @app.get("/results/latest/{sensor_id}", response_model=Result)
 def latestResult(sensor_id: str):
-    return Result(**database.getLatestResult(sensor_id))
+    try:
+        result = database.getLatestResult(sensor_id)
+        logger.info(f"Fetched latest result for \'{sensor_id}\'")
+        return Result(**result)
+    except Exception as e:
+        logger.error(f"An error occured fetching latest result for \'{sensor_id}\': {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
 # 주어진 기간 동안의 과거 판단 결과를 DB에서 가져옴
 @app.get("/results/range/{sensor_id}", response_model=List[Result])
 def resultsByTime(sensor_id: str, start_time: str, end_time: str):
-    results = database.getResultsByTime(sensor_id, start_time, end_time)
-    return [Result(**result) for result in results]
+    try:
+        results = database.getResultsByTime(sensor_id, start_time, end_time)
+        logger.info(f"Fetched results for \'{sensor_id}\' from {start_time} to {end_time}.")
+        return [Result(**result) for result in results]
+    except Exception as e:
+        logger.error(f"An error occured fetching results for \'{sensor_id}\': {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
 # 오든 센서 데이터 API에 대한 Proxy API
 @app.get("/proxy/{endpoint}")
 async def proxy_request(endpoint: str, params: dict = None):
-    headers = {"Authorization": f"Bearer {app.state.token}"}
-    url = f"{os.getenv("API_BASE_URL")}/{endpoint}"
+    # headers = {"Authorization": f"Bearer {app.state.token}"}
+    headers = {"Content-Type": "application/json"}
+    url = f"{os.getenv('API_BASE_URL')}/{endpoint}"
     try:
         response = requests.get(url, headers=headers, params=params)
         response.raise_for_status()
