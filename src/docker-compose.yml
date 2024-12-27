@@ -1,0 +1,26 @@
+version: "3.8"
+services:
+  backend:
+    image: cpyy5526/bfdetect-backend:latest
+    ports:
+      - "8000:8000" # FastAPI 기본 포트
+    volumes:
+      - .:/app/data
+    networks:
+      - bfdetect-network
+
+  frontend:
+    image: cpyy5526/bfdetect-frontend:latest
+    ports:
+      - "3000:3000" # Next.js 기본 포트
+    environment:
+      - API_URL=http://backend:8000
+      - NEXTAUTH_URL=http://localhost:3000
+    depends_on:
+      - backend
+    networks:
+      - bfdetect-network
+
+networks:
+  bfdetect-network:
+    driver: bridge
